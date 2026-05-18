@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { RoundBadge, SectorBadge } from './Badge'
-import { ArrowUpRight, X, Building2, MapPin, Calendar, DollarSign, TrendingUp } from 'lucide-react'
+import { ArrowUpRight, X, MapPin, Calendar, DollarSign, TrendingUp, Globe } from 'lucide-react'
 
 function formatAmount(n) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
@@ -13,6 +13,20 @@ function formatDate(dateStr) {
     day: 'numeric',
     year: 'numeric',
   })
+}
+
+function getWebsiteUrl(raise) {
+  if (raise.website) return raise.website
+
+  const domain = raise.company
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '')
+
+  return `https://${domain}.com`
+}
+
+function formatHostname(url) {
+  return url.replace(/^https?:\/\//, '').replace(/\/$/, '')
 }
 
 function DetailModal({ raise, onClose }) {
@@ -62,8 +76,18 @@ function DetailModal({ raise, onClose }) {
         </div>
 
         {/* Description */}
-        <div className="p-6">
+        <div className="p-6 space-y-4">
           <p className="text-[#a1a1aa] text-sm leading-relaxed">{raise.description}</p>
+          <a
+            href={getWebsiteUrl(raise)}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-lg border border-[#27272a] bg-[#09090b] px-3 py-2 text-sm font-medium text-[#fafafa] transition-colors hover:border-[#6366f1] hover:text-white"
+          >
+            <Globe size={15} className="text-[#818cf8]" />
+            {formatHostname(getWebsiteUrl(raise))}
+            <ArrowUpRight size={14} className="text-[#52525b]" />
+          </a>
         </div>
       </div>
     </div>
@@ -112,39 +136,63 @@ export default function NewsFeed({ raises, activeRounds }) {
             No matching rounds found.
           </div>
         )}
-        {filtered.map(raise => (
-          <button
-            key={raise.id}
-            onClick={() => setSelected(raise)}
-            className="w-full text-left group flex items-start gap-4 p-4 rounded-xl border border-[#27272a] bg-[#18181b] hover:border-[#3f3f46] hover:bg-[#1c1c1f] transition-all"
-          >
-            {/* Company initial */}
+        {filtered.map(raise => {
+          const websiteUrl = getWebsiteUrl(raise)
+
+          return (
             <div
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
-              style={{ background: '#6366f115', color: '#6366f1', border: '1px solid #6366f125' }}
+              key={raise.id}
+              role="button"
+              tabIndex={0}
+              onClick={() => setSelected(raise)}
+              onKeyDown={e => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  setSelected(raise)
+                }
+              }}
+              className="w-full text-left group flex items-start gap-4 p-4 rounded-xl border border-[#27272a] bg-[#18181b] hover:border-[#3f3f46] hover:bg-[#1c1c1f] transition-all cursor-pointer"
             >
-              {raise.company.charAt(0)}
-            </div>
-
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-sm font-semibold text-[#fafafa] group-hover:text-white">{raise.company}</span>
-                <RoundBadge round={raise.round} small />
-                <SectorBadge sector={raise.sector} />
+              {/* Company initial */}
+              <div
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
+                style={{ background: '#6366f115', color: '#6366f1', border: '1px solid #6366f125' }}
+              >
+                {raise.company.charAt(0)}
               </div>
-              <p className="text-xs text-[#71717a] mt-1 line-clamp-1">{raise.description}</p>
-            </div>
 
-            <div className="flex flex-col items-end gap-1 flex-shrink-0">
-              <span className="text-sm font-bold text-[#fafafa]">{formatAmount(raise.amount)}</span>
-              <span className="text-[10px] text-[#52525b]">{formatDate(raise.date)}</span>
-              <ArrowUpRight
-                size={14}
-                className="text-[#3f3f46] group-hover:text-[#6366f1] transition-colors mt-0.5"
-              />
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="text-sm font-semibold text-[#fafafa] group-hover:text-white">{raise.company}</span>
+                  <RoundBadge round={raise.round} small />
+                  <SectorBadge sector={raise.sector} />
+                </div>
+                <p className="text-xs text-[#71717a] mt-1 line-clamp-1">{raise.description}</p>
+                <a
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={e => e.stopPropagation()}
+                  onKeyDown={e => e.stopPropagation()}
+                  className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#818cf8] hover:text-[#a5b4fc]"
+                >
+                  <Globe size={13} />
+                  {formatHostname(websiteUrl)}
+                  <ArrowUpRight size={12} />
+                </a>
+              </div>
+
+              <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                <span className="text-sm font-bold text-[#fafafa]">{formatAmount(raise.amount)}</span>
+                <span className="text-[10px] text-[#52525b]">{formatDate(raise.date)}</span>
+                <ArrowUpRight
+                  size={14}
+                  className="text-[#3f3f46] group-hover:text-[#6366f1] transition-colors mt-0.5"
+                />
+              </div>
             </div>
-          </button>
-        ))}
+          )
+        })}
       </div>
     </div>
   )
