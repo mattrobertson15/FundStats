@@ -52,6 +52,8 @@ export const raises = [
   { id: 35, company: 'Prism Analytics',    round: 'Series A',  amount: 40,   valuation: 210,  date: '2025-05-13', sector: 'Analytics',     hq: 'Austin, TX',         description: 'Prism Analytics closed $40M Series A to build real-time supply chain visibility software for Fortune 500 manufacturers.' },
 ]
 
+export const SECTORS = [...new Set(raises.map(r => r.sector))]
+
 function aggregateByPeriod(data, period) {
   const buckets = {}
 

@@ -4,7 +4,7 @@ import FundingChart from './components/FundingChart'
 import FilterBar from './components/FilterBar'
 import NewsFeed from './components/NewsFeed'
 import StatCard from './components/StatCard'
-import { raises } from './data/sampleData'
+import { raises, ROUNDS, SECTORS } from './data/sampleData'
 
 function formatAmount(n) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
@@ -13,13 +13,17 @@ function formatAmount(n) {
 
 export default function App() {
   const [period, setPeriod] = useState('quarterly')
-  const [activeRounds, setActiveRounds] = useState(['Total'])
-  const [chartType, setChartType] = useState('area')
+  const [activeRounds, setActiveRounds] = useState(ROUNDS)
+  const [activeSectors, setActiveSectors] = useState(SECTORS)
+  const [chartType, setChartType] = useState('bar')
 
   const filteredRaises = useMemo(() => {
-    if (activeRounds.includes('Total')) return raises
-    return raises.filter(r => activeRounds.includes(r.round))
-  }, [activeRounds])
+    return raises.filter(r => {
+      const matchRound = activeRounds.includes('Total') || activeRounds.includes(r.round)
+      const matchSector = activeSectors.includes(r.sector)
+      return matchRound && matchSector
+    })
+  }, [activeRounds, activeSectors])
 
   const stats = useMemo(() => {
     const total = filteredRaises.reduce((s, r) => s + r.amount, 0)
@@ -87,7 +91,7 @@ export default function App() {
         <div className="rounded-2xl border border-[#27272a] bg-[#18181b] p-5 space-y-5">
           <div>
             <h2 className="text-sm font-semibold text-[#fafafa]">Total Venture Funding</h2>
-            <p className="text-xs text-[#52525b] mt-0.5">Aggregated by selected period and stage</p>
+            <p className="text-xs text-[#52525b] mt-0.5">Aggregated by selected period, stage, and industry</p>
           </div>
 
           <FilterBar
@@ -95,6 +99,8 @@ export default function App() {
             setPeriod={setPeriod}
             activeRounds={activeRounds}
             setActiveRounds={setActiveRounds}
+            activeSectors={activeSectors}
+            setActiveSectors={setActiveSectors}
             chartType={chartType}
             setChartType={setChartType}
           />
@@ -109,7 +115,7 @@ export default function App() {
 
         {/* News feed */}
         <div className="rounded-2xl border border-[#27272a] bg-[#09090b] p-5">
-          <NewsFeed raises={raises} activeRounds={activeRounds} />
+          <NewsFeed raises={filteredRaises} activeRounds={activeRounds} />
         </div>
 
       </main>

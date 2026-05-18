@@ -1,11 +1,22 @@
-import React from 'react'
-import { ROUNDS, ROUND_COLORS } from '../data/sampleData'
-import { BarChart2, TrendingUp } from 'lucide-react'
+import React, { useState } from 'react'
+import { ROUNDS, ROUND_COLORS, SECTORS } from '../data/sampleData'
+import { BarChart2, Building2, Check, ChevronDown, TrendingUp } from 'lucide-react'
 
 const PERIODS = ['daily', 'monthly', 'quarterly', 'yearly']
 const ALL_ROUND_OPTIONS = ['Total', ...ROUNDS]
 
-export default function FilterBar({ period, setPeriod, activeRounds, setActiveRounds, chartType, setChartType }) {
+export default function FilterBar({
+  period,
+  setPeriod,
+  activeRounds,
+  setActiveRounds,
+  activeSectors,
+  setActiveSectors,
+  chartType,
+  setChartType,
+}) {
+  const [industryMenuOpen, setIndustryMenuOpen] = useState(false)
+
   function toggleRound(rnd) {
     if (rnd === 'Total') {
       setActiveRounds(['Total'])
@@ -20,10 +31,26 @@ export default function FilterBar({ period, setPeriod, activeRounds, setActiveRo
     }
   }
 
+  function toggleSector(sector) {
+    if (activeSectors.includes(sector)) {
+      setActiveSectors(activeSectors.filter(s => s !== sector))
+    } else {
+      setActiveSectors([...activeSectors, sector])
+    }
+  }
+
+  function toggleAllSectors() {
+    setActiveSectors(activeSectors.length === SECTORS.length ? [] : SECTORS)
+  }
+
   const isActive = (rnd) => {
     if (rnd === 'Total') return activeRounds.includes('Total')
     return !activeRounds.includes('Total') && activeRounds.includes(rnd)
   }
+
+  const selectedIndustryLabel = activeSectors.length === SECTORS.length
+    ? 'All Industries'
+    : `${activeSectors.length} Industries`
 
   return (
     <div className="flex flex-wrap gap-4 items-center">
@@ -64,6 +91,70 @@ export default function FilterBar({ period, setPeriod, activeRounds, setActiveRo
         >
           <BarChart2 size={14} />
         </button>
+      </div>
+
+      {/* Industry selector */}
+      <div className="relative">
+        <button
+          type="button"
+          onClick={() => setIndustryMenuOpen(!industryMenuOpen)}
+          className="h-9 flex items-center gap-2 bg-[#18181b] border border-[#27272a] rounded-lg px-3 text-xs font-medium text-[#a1a1aa] hover:text-[#fafafa] hover:border-[#3f3f46] transition-all"
+        >
+          <Building2 size={14} />
+          <span>{selectedIndustryLabel}</span>
+          <ChevronDown
+            size={14}
+            className={`transition-transform ${industryMenuOpen ? 'rotate-180' : ''}`}
+          />
+        </button>
+
+        {industryMenuOpen && (
+          <div className="absolute left-0 top-11 z-40 w-64 rounded-xl border border-[#27272a] bg-[#18181b] shadow-2xl p-2">
+            <label className="flex items-center gap-2 px-2 py-2 rounded-lg text-xs font-medium text-[#fafafa] hover:bg-[#27272a] cursor-pointer">
+              <input
+                type="checkbox"
+                checked={activeSectors.length === SECTORS.length}
+                onChange={toggleAllSectors}
+                className="sr-only"
+              />
+              <span className="w-4 h-4 rounded border border-[#3f3f46] bg-[#09090b] flex items-center justify-center">
+                {activeSectors.length === SECTORS.length && <Check size={12} className="text-[#fafafa]" />}
+              </span>
+              All Industries
+            </label>
+
+            <div className="my-1 border-t border-[#27272a]" />
+
+            <div className="max-h-64 overflow-y-auto pr-1">
+              {SECTORS.map(sector => {
+                const selected = activeSectors.includes(sector)
+                return (
+                  <label
+                    key={sector}
+                    className="flex items-center gap-2 px-2 py-2 rounded-lg text-xs font-medium text-[#a1a1aa] hover:bg-[#27272a] hover:text-[#fafafa] cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selected}
+                      onChange={() => toggleSector(sector)}
+                      className="sr-only"
+                    />
+                    <span
+                      className="w-4 h-4 rounded border flex items-center justify-center"
+                      style={{
+                        background: selected ? '#6366f1' : '#09090b',
+                        borderColor: selected ? '#6366f1' : '#3f3f46',
+                      }}
+                    >
+                      {selected && <Check size={12} className="text-white" />}
+                    </span>
+                    <span className="truncate">{sector}</span>
+                  </label>
+                )
+              })}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Round checkboxes */}
