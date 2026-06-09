@@ -1,31 +1,5 @@
 import React from 'react'
-import { ROUND_COLORS } from '../data/sampleData'
-
-const sectorColors = {
-  'AI/ML':         '#6366f1',
-  'CleanTech':     '#22c55e',
-  'HealthTech':    '#38bdf8',
-  'Robotics':      '#f59e0b',
-  'FinTech':       '#a78bfa',
-  'DevTools':      '#818cf8',
-  'Quantum':       '#c084fc',
-  'Logistics':     '#fb923c',
-  'Semiconductors':'#facc15',
-  'Biotech':       '#34d399',
-  'EdTech':        '#f472b6',
-  'SpaceTech':     '#67e8f9',
-  'Cybersecurity': '#f87171',
-  'AgriTech':      '#86efac',
-  'Materials':     '#fcd34d',
-  'Analytics':     '#a5b4fc',
-  'Cloud':         '#93c5fd',
-  'Computer Vision':'#fb7185',
-  'Data Privacy':  '#c4b5fd',
-  'Mobility':      '#fdba74',
-  'InsurTech':     '#6ee7b7',
-  'Energy':        '#fde68a',
-  'DefenseTech':   '#fca5a5',
-}
+import { ROUND_COLORS, SECTOR_COLORS } from '../data/sampleData'
 
 export function RoundBadge({ round, small }) {
   const color = ROUND_COLORS[round] || '#6366f1'
@@ -40,7 +14,7 @@ export function RoundBadge({ round, small }) {
 }
 
 export function SectorBadge({ sector }) {
-  const color = sectorColors[sector] || '#a1a1aa'
+  const color = SECTOR_COLORS[sector] || '#a1a1aa'
   return (
     <span
       style={{ background: color + '18', color, border: `1px solid ${color}33` }}

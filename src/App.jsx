@@ -4,7 +4,8 @@ import FundingChart from './components/FundingChart'
 import FilterBar from './components/FilterBar'
 import NewsFeed from './components/NewsFeed'
 import StatCard from './components/StatCard'
-import { raises, ROUNDS, SECTORS } from './data/sampleData'
+import VCTracker from './components/VCTracker'
+import { raises, ROUNDS, SECTORS, vcFirms } from './data/sampleData'
 
 function formatAmount(n) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
@@ -12,6 +13,7 @@ function formatAmount(n) {
 }
 
 export default function App() {
+  const [activeTab, setActiveTab] = useState('market')
   const [period, setPeriod] = useState('quarterly')
   const [activeRounds, setActiveRounds] = useState(ROUNDS)
   const [activeSectors, setActiveSectors] = useState(SECTORS)
@@ -37,14 +39,37 @@ export default function App() {
     <div className="min-h-screen bg-[#09090b]">
       {/* Topbar */}
       <header className="border-b border-[#18181b] bg-[#09090b]/80 backdrop-blur-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between">
-          <div className="flex items-center gap-2.5">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+          {/* Logo */}
+          <div className="flex items-center gap-2.5 flex-shrink-0">
             <div className="w-7 h-7 rounded-lg bg-[#6366f1] flex items-center justify-center">
               <Activity size={15} className="text-white" />
             </div>
             <span className="text-sm font-semibold tracking-tight text-[#fafafa]">Fund Stats</span>
           </div>
-          <div className="flex items-center gap-2">
+
+          {/* Tab switcher */}
+          <div className="flex items-center bg-[#18181b] border border-[#27272a] rounded-lg p-1 gap-1">
+            {[
+              { id: 'market', label: 'Market' },
+              { id: 'vc',     label: 'VC Tracker' },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-[#6366f1] text-white'
+                    : 'text-[#71717a] hover:text-[#a1a1aa]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Badge */}
+          <div className="flex items-center gap-2 flex-shrink-0">
             <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full">
               Sample Data · 2024–2025
             </span>
@@ -54,69 +79,77 @@ export default function App() {
 
       <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
 
-        {/* Hero */}
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#fafafa]">
-            Venture Capital Funding
-          </h1>
-          <p className="text-sm text-[#52525b] mt-1">
-            Track and analyze startup funding rounds across stages and sectors.
-          </p>
-        </div>
+        {activeTab === 'market' && (
+          <>
+            {/* Hero */}
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight text-[#fafafa]">
+                Venture Capital Funding
+              </h1>
+              <p className="text-sm text-[#52525b] mt-1">
+                Track and analyze startup funding rounds across stages and sectors.
+              </p>
+            </div>
 
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-          <StatCard
-            label="Total Raised"
-            value={formatAmount(stats.total)}
-            sub={`${filteredRaises.length} rounds`}
-            accent="#6366f1"
-          />
-          <StatCard
-            label="Avg Deal Size"
-            value={formatAmount(Math.round(stats.avgDeal))}
-          />
-          <StatCard
-            label="Largest Round"
-            value={formatAmount(stats.largest)}
-          />
-          <StatCard
-            label="Companies"
-            value={stats.companies}
-            sub="unique"
-          />
-        </div>
+            {/* Stat cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+              <StatCard
+                label="Total Raised"
+                value={formatAmount(stats.total)}
+                sub={`${filteredRaises.length} rounds`}
+                accent="#6366f1"
+              />
+              <StatCard
+                label="Avg Deal Size"
+                value={formatAmount(Math.round(stats.avgDeal))}
+              />
+              <StatCard
+                label="Largest Round"
+                value={formatAmount(stats.largest)}
+              />
+              <StatCard
+                label="Companies"
+                value={stats.companies}
+                sub="unique"
+              />
+            </div>
 
-        {/* Chart panel */}
-        <div className="rounded-2xl border border-[#27272a] bg-[#18181b] p-5 space-y-5">
-          <div>
-            <h2 className="text-sm font-semibold text-[#fafafa]">Total Venture Funding</h2>
-            <p className="text-xs text-[#52525b] mt-0.5">Aggregated by selected period, stage, and industry</p>
-          </div>
+            {/* Chart panel */}
+            <div className="rounded-2xl border border-[#27272a] bg-[#18181b] p-5 space-y-5">
+              <div>
+                <h2 className="text-sm font-semibold text-[#fafafa]">Total Venture Funding</h2>
+                <p className="text-xs text-[#52525b] mt-0.5">Aggregated by selected period, stage, and industry</p>
+              </div>
 
-          <FilterBar
-            period={period}
-            setPeriod={setPeriod}
-            activeRounds={activeRounds}
-            setActiveRounds={setActiveRounds}
-            activeSectors={activeSectors}
-            setActiveSectors={setActiveSectors}
-            chartType={chartType}
-            setChartType={setChartType}
-          />
+              <FilterBar
+                period={period}
+                setPeriod={setPeriod}
+                activeRounds={activeRounds}
+                setActiveRounds={setActiveRounds}
+                activeSectors={activeSectors}
+                setActiveSectors={setActiveSectors}
+                chartType={chartType}
+                setChartType={setChartType}
+              />
 
-          <FundingChart
-            period={period}
-            activeRounds={activeRounds}
-            raises={filteredRaises}
-            chartType={chartType}
-          />
-        </div>
+              <FundingChart
+                period={period}
+                activeRounds={activeRounds}
+                raises={filteredRaises}
+                chartType={chartType}
+              />
+            </div>
 
-        {/* News feed */}
-        <div className="rounded-2xl border border-[#27272a] bg-[#09090b] p-5">
-          <NewsFeed raises={filteredRaises} activeRounds={activeRounds} />
-        </div>
+            {/* News feed */}
+            <div className="rounded-2xl border border-[#27272a] bg-[#09090b] p-5">
+              <NewsFeed raises={filteredRaises} activeRounds={activeRounds} />
+            </div>
+          </>
+        )}
+
+        {activeTab === 'vc' && (
+          <VCTracker raises={raises} vcFirms={vcFirms} />
+        )}
 
       </main>
     </div>
