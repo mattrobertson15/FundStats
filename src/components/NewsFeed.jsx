@@ -11,7 +11,9 @@ function formatAmount(n) {
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short', day: 'numeric', year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   })
 }
 
