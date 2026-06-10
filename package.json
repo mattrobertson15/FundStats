@@ -1,6 +1,7 @@
 {
   "name": "fundstats",
   "version": "1.0.0",
+  "type": "module",
   "description": "Tracking and visualizing startup raises",
   "main": "index.js",
   "scripts": {

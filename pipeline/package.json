@@ -1,0 +1,23 @@
+{
+  "name": "fundstats-pipeline",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "api": "node api/index.js",
+    "seed": "node db/seed.js",
+    "edgar": "node scrapers/edgar.js",
+    "portfolios": "node scrapers/run-all.js",
+    "enrich": "node enrichment/claude.js",
+    "pipeline:now": "node scheduler.js --now",
+    "start": "node scheduler.js"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.55.0",
+    "better-sqlite3": "^11.10.0",
+    "cheerio": "^1.0.0",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "playwright": "^1.52.0"
+  }
+}

@@ -5,7 +5,8 @@ import FilterBar from './components/FilterBar'
 import NewsFeed from './components/NewsFeed'
 import StatCard from './components/StatCard'
 import VCTracker from './components/VCTracker'
-import { raises, ROUNDS, SECTORS, vcFirms } from './data/sampleData'
+import { useRaises, useVCFirms } from './hooks/useData'
+import { ROUNDS, SECTORS } from './data/sampleData'
 
 function formatAmount(n) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
@@ -19,7 +20,11 @@ export default function App() {
   const [activeSectors, setActiveSectors] = useState(SECTORS)
   const [chartType, setChartType] = useState('bar')
 
+  const { data: raises, loading: raisesLoading, error: raisesError } = useRaises()
+  const { data: vcFirms, loading: vcLoading } = useVCFirms()
+
   const filteredRaises = useMemo(() => {
+    if (!raises) return []
     return raises.filter(r => {
       const matchRound = activeRounds.includes('Total') || activeRounds.includes(r.round)
       const matchSector = activeSectors.includes(r.sector)
@@ -70,9 +75,19 @@ export default function App() {
 
           {/* Badge */}
           <div className="flex items-center gap-2 flex-shrink-0">
-            <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full">
-              Sample Data · 2024–2025
-            </span>
+            {raisesLoading ? (
+              <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full animate-pulse">
+                Loading…
+              </span>
+            ) : raisesError ? (
+              <span className="text-xs text-[#f59e0b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full" title={raisesError}>
+                Sample Data
+              </span>
+            ) : (
+              <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full">
+                Live Data
+              </span>
+            )}
           </div>
         </div>
       </header>
