@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { ArrowLeft, Building2, Calendar } from 'lucide-react'
+import { ArrowLeft, Building2, Calendar, Network } from 'lucide-react'
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
 } from 'recharts'
@@ -63,12 +63,20 @@ export default function VCFirmPage() {
   return (
     <div className="space-y-8">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-[#52525b]">
-        <Link to="/vc" className="hover:text-[#a1a1aa] transition-colors flex items-center gap-1.5">
-          <ArrowLeft size={14} /> VC Tracker
+      <div className="flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 text-sm text-[#52525b]">
+          <Link to="/vc" className="hover:text-[#a1a1aa] transition-colors flex items-center gap-1.5">
+            <ArrowLeft size={14} /> VC Tracker
+          </Link>
+          <span>/</span>
+          <span className="text-[#fafafa]">{firm.shortName}</span>
+        </div>
+        <Link
+          to="/vc/network"
+          className="flex items-center gap-1.5 text-xs text-[#52525b] hover:text-[#818cf8] transition-colors"
+        >
+          <Network size={13} /> Co-Investor Network
         </Link>
-        <span>/</span>
-        <span className="text-[#fafafa]">{firm.shortName}</span>
       </div>
 
       {/* Firm header */}

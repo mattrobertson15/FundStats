@@ -1,10 +1,11 @@
 import React from 'react'
 import { Routes, Route, NavLink, Outlet } from 'react-router-dom'
 import { Activity } from 'lucide-react'
-import MarketPage      from './pages/MarketPage'
-import VCTrackerPage   from './pages/VCTrackerPage'
-import VCFirmPage      from './pages/VCFirmPage'
-import CompanyPage     from './pages/CompanyPage'
+import MarketPage        from './pages/MarketPage'
+import VCTrackerPage     from './pages/VCTrackerPage'
+import VCFirmPage        from './pages/VCFirmPage'
+import CompanyPage       from './pages/CompanyPage'
+import CoInvestorPage    from './pages/CoInvestorPage'
 import { useData }     from './context/DataContext'
 
 const tabClass = ({ isActive }) =>
@@ -61,9 +62,10 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Layout />}>
-        <Route index              element={<MarketPage />} />
-        <Route path="vc"          element={<VCTrackerPage />} />
-        <Route path="vc/:firmId"  element={<VCFirmPage />} />
+        <Route index                element={<MarketPage />} />
+        <Route path="vc"            element={<VCTrackerPage />} />
+        <Route path="vc/network"    element={<CoInvestorPage />} />
+        <Route path="vc/:firmId"    element={<VCFirmPage />} />
         <Route path="company/:slug" element={<CompanyPage />} />
       </Route>
     </Routes>
