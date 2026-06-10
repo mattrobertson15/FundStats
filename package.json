@@ -1,6 +1,7 @@
 {
   "name": "fundstats",
   "version": "1.0.0",
+  "type": "module",
   "description": "Tracking and visualizing startup raises",
   "main": "index.js",
   "scripts": {
@@ -19,6 +20,7 @@
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",
     "react-dom": "^19.2.6",
+    "react-router-dom": "^7.17.0",
     "recharts": "^3.8.1"
   },
   "devDependencies": {
