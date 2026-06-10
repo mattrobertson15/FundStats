@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "api": "node api/index.js",
+    "live": "node live.js",
     "seed": "node db/seed.js",
     "edgar": "node scrapers/edgar.js",
     "portfolios": "node scrapers/run-all.js",

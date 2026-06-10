@@ -5,6 +5,7 @@
  * Form D does NOT include investor names — use portfolio scrapers for VC relationships.
  */
 import { getDb } from '../db/client.js'
+import { fileURLToPath } from 'url'
 
 const EFTS_BASE = 'https://efts.sec.gov/LATEST/search-index'
 const USER_AGENT = 'FundStats/1.0 contact@fundstats.example.com'
@@ -169,6 +170,5 @@ export async function runEdgarPoller({ days = 7 } = {}) {
 
 // CLI entry point
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  const { fileURLToPath } = await import('url')
   await runEdgarPoller({ days: 30 })
 }
