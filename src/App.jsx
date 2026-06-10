@@ -1,172 +1,71 @@
-import React, { useState, useMemo } from 'react'
+import React from 'react'
+import { Routes, Route, NavLink, Outlet } from 'react-router-dom'
 import { Activity } from 'lucide-react'
-import FundingChart from './components/FundingChart'
-import FilterBar from './components/FilterBar'
-import NewsFeed from './components/NewsFeed'
-import StatCard from './components/StatCard'
-import VCTracker from './components/VCTracker'
-import { useRaises, useVCFirms } from './hooks/useData'
-import { ROUNDS, SECTORS } from './data/sampleData'
+import MarketPage      from './pages/MarketPage'
+import VCTrackerPage   from './pages/VCTrackerPage'
+import VCFirmPage      from './pages/VCFirmPage'
+import CompanyPage     from './pages/CompanyPage'
+import { useData }     from './context/DataContext'
 
-function formatAmount(n) {
-  if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
-  return `$${n}M`
+const tabClass = ({ isActive }) =>
+  `px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
+    isActive ? 'bg-[#6366f1] text-white' : 'text-[#71717a] hover:text-[#a1a1aa]'
+  }`
+
+function Header() {
+  const { loading, usingLiveData } = useData()
+
+  return (
+    <header className="border-b border-[#18181b] bg-[#09090b]/80 backdrop-blur-sm sticky top-0 z-30">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+        <NavLink to="/" className="flex items-center gap-2.5 flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-[#6366f1] flex items-center justify-center">
+            <Activity size={15} className="text-white" />
+          </div>
+          <span className="text-sm font-semibold tracking-tight text-[#fafafa]">Fund Stats</span>
+        </NavLink>
+
+        <div className="flex items-center bg-[#18181b] border border-[#27272a] rounded-lg p-1 gap-1">
+          <NavLink to="/"   end className={tabClass}>Market</NavLink>
+          <NavLink to="/vc"     className={tabClass}>VC Tracker</NavLink>
+        </div>
+
+        <div className="flex-shrink-0">
+          {loading ? (
+            <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full animate-pulse">
+              Loading…
+            </span>
+          ) : (
+            <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full">
+              {usingLiveData ? 'Live Data' : 'Sample Data'}
+            </span>
+          )}
+        </div>
+      </div>
+    </header>
+  )
+}
+
+function Layout() {
+  return (
+    <div className="min-h-screen bg-[#09090b]">
+      <Header />
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+        <Outlet />
+      </main>
+    </div>
+  )
 }
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('market')
-  const [period, setPeriod] = useState('quarterly')
-  const [activeRounds, setActiveRounds] = useState(ROUNDS)
-  const [activeSectors, setActiveSectors] = useState(SECTORS)
-  const [chartType, setChartType] = useState('bar')
-
-  const { data: raises, loading: raisesLoading, error: raisesError } = useRaises()
-  const { data: vcFirms, loading: vcLoading } = useVCFirms()
-
-  const filteredRaises = useMemo(() => {
-    if (!raises) return []
-    return raises.filter(r => {
-      const matchRound = activeRounds.includes('Total') || activeRounds.includes(r.round)
-      const matchSector = activeSectors.includes(r.sector)
-      return matchRound && matchSector
-    })
-  }, [activeRounds, activeSectors])
-
-  const stats = useMemo(() => {
-    const total = filteredRaises.reduce((s, r) => s + r.amount, 0)
-    const avgDeal = filteredRaises.length ? total / filteredRaises.length : 0
-    const largest = filteredRaises.reduce((m, r) => r.amount > m ? r.amount : m, 0)
-    const companies = new Set(filteredRaises.map(r => r.company)).size
-    return { total, avgDeal, largest, companies }
-  }, [filteredRaises])
-
   return (
-    <div className="min-h-screen bg-[#09090b]">
-      {/* Topbar */}
-      <header className="border-b border-[#18181b] bg-[#09090b]/80 backdrop-blur-sm sticky top-0 z-30">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          {/* Logo */}
-          <div className="flex items-center gap-2.5 flex-shrink-0">
-            <div className="w-7 h-7 rounded-lg bg-[#6366f1] flex items-center justify-center">
-              <Activity size={15} className="text-white" />
-            </div>
-            <span className="text-sm font-semibold tracking-tight text-[#fafafa]">Fund Stats</span>
-          </div>
-
-          {/* Tab switcher */}
-          <div className="flex items-center bg-[#18181b] border border-[#27272a] rounded-lg p-1 gap-1">
-            {[
-              { id: 'market', label: 'Market' },
-              { id: 'vc',     label: 'VC Tracker' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`px-3 py-1.5 rounded-md text-xs font-medium transition-all ${
-                  activeTab === tab.id
-                    ? 'bg-[#6366f1] text-white'
-                    : 'text-[#71717a] hover:text-[#a1a1aa]'
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-
-          {/* Badge */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {raisesLoading ? (
-              <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full animate-pulse">
-                Loading…
-              </span>
-            ) : raisesError ? (
-              <span className="text-xs text-[#f59e0b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full" title={raisesError}>
-                Sample Data
-              </span>
-            ) : (
-              <span className="text-xs text-[#52525b] bg-[#18181b] border border-[#27272a] px-2.5 py-1 rounded-full">
-                Live Data
-              </span>
-            )}
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-8">
-
-        {activeTab === 'market' && (
-          <>
-            {/* Hero */}
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight text-[#fafafa]">
-                Venture Capital Funding
-              </h1>
-              <p className="text-sm text-[#52525b] mt-1">
-                Track and analyze startup funding rounds across stages and sectors.
-              </p>
-            </div>
-
-            {/* Stat cards */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <StatCard
-                label="Total Raised"
-                value={formatAmount(stats.total)}
-                sub={`${filteredRaises.length} rounds`}
-                accent="#6366f1"
-              />
-              <StatCard
-                label="Avg Deal Size"
-                value={formatAmount(Math.round(stats.avgDeal))}
-              />
-              <StatCard
-                label="Largest Round"
-                value={formatAmount(stats.largest)}
-              />
-              <StatCard
-                label="Companies"
-                value={stats.companies}
-                sub="unique"
-              />
-            </div>
-
-            {/* Chart panel */}
-            <div className="rounded-2xl border border-[#27272a] bg-[#18181b] p-5 space-y-5">
-              <div>
-                <h2 className="text-sm font-semibold text-[#fafafa]">Total Venture Funding</h2>
-                <p className="text-xs text-[#52525b] mt-0.5">Aggregated by selected period, stage, and industry</p>
-              </div>
-
-              <FilterBar
-                period={period}
-                setPeriod={setPeriod}
-                activeRounds={activeRounds}
-                setActiveRounds={setActiveRounds}
-                activeSectors={activeSectors}
-                setActiveSectors={setActiveSectors}
-                chartType={chartType}
-                setChartType={setChartType}
-              />
-
-              <FundingChart
-                period={period}
-                activeRounds={activeRounds}
-                raises={filteredRaises}
-                chartType={chartType}
-              />
-            </div>
-
-            {/* News feed */}
-            <div className="rounded-2xl border border-[#27272a] bg-[#09090b] p-5">
-              <NewsFeed raises={filteredRaises} activeRounds={activeRounds} />
-            </div>
-          </>
-        )}
-
-        {activeTab === 'vc' && (
-          <VCTracker raises={raises} vcFirms={vcFirms} />
-        )}
-
-      </main>
-    </div>
+    <Routes>
+      <Route path="/" element={<Layout />}>
+        <Route index              element={<MarketPage />} />
+        <Route path="vc"          element={<VCTrackerPage />} />
+        <Route path="vc/:firmId"  element={<VCFirmPage />} />
+        <Route path="company/:slug" element={<CompanyPage />} />
+      </Route>
+    </Routes>
   )
 }

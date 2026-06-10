@@ -8,7 +8,7 @@ function formatAmount(n) {
   return `$${n}M`
 }
 
-export default function VCCard({ firm, portfolio, totalDeployed, investmentCount, topSectors, stageCounts, isSelected, onClick }) {
+export default function VCCard({ firm, totalDeployed, investmentCount, topSectors, stageCounts, onClick }) {
   const totalStages = investmentCount || 1
 
   return (
@@ -17,11 +17,7 @@ export default function VCCard({ firm, portfolio, totalDeployed, investmentCount
       tabIndex={0}
       onClick={onClick}
       onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
-      className="cursor-pointer group flex flex-col gap-3.5 p-4 rounded-xl border bg-[#18181b] transition-all hover:bg-[#1c1c1f]"
-      style={{
-        borderColor: isSelected ? firm.color : '#27272a',
-        boxShadow: isSelected ? `0 0 0 1px ${firm.color}` : 'none',
-      }}
+      className="cursor-pointer group flex flex-col gap-3.5 p-4 rounded-xl border border-[#27272a] bg-[#18181b] transition-all hover:bg-[#1c1c1f] hover:border-[#3f3f46]"
     >
       {/* Header row */}
       <div className="flex items-start justify-between gap-2">

@@ -1,7 +1,8 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { RoundBadge, SectorBadge } from './Badge'
 import { ArrowUpRight, Globe } from 'lucide-react'
-import DetailModal from './DetailModal'
+import { toSlug } from '../utils/slugify'
 
 function formatAmount(n) {
   if (n >= 1000) return `$${(n / 1000).toFixed(1)}B`
@@ -10,16 +11,13 @@ function formatAmount(n) {
 
 function formatDate(dateStr) {
   return new Date(dateStr).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+    month: 'short', day: 'numeric', year: 'numeric',
   })
 }
 
 function getWebsiteUrl(raise) {
   if (raise.website) return raise.website
-  const domain = raise.company.toLowerCase().replace(/[^a-z0-9]+/g, '')
-  return `https://${domain}.com`
+  return `https://${raise.company.toLowerCase().replace(/[^a-z0-9]+/g, '')}.com`
 }
 
 function formatHostname(url) {
@@ -27,13 +25,14 @@ function formatHostname(url) {
 }
 
 export default function NewsFeed({ raises, activeRounds }) {
-  const [selected, setSelected] = useState(null)
   const [search, setSearch] = useState('')
 
   const filtered = raises
     .filter(r => {
-      const matchRound = activeRounds.includes('Total') || activeRounds.includes(r.round)
-      const matchSearch = !search || r.company.toLowerCase().includes(search.toLowerCase()) || r.sector.toLowerCase().includes(search.toLowerCase())
+      const matchRound  = activeRounds.includes('Total') || activeRounds.includes(r.round)
+      const matchSearch = !search
+        || r.company.toLowerCase().includes(search.toLowerCase())
+        || r.sector.toLowerCase().includes(search.toLowerCase())
       return matchRound && matchSearch
     })
     .sort((a, b) => new Date(b.date) - new Date(a.date))
@@ -42,9 +41,6 @@ export default function NewsFeed({ raises, activeRounds }) {
 
   return (
     <div>
-      <DetailModal raise={selected} onClose={() => setSelected(null)} />
-
-      {/* Section header */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div>
           <h2 className="text-base font-semibold text-[#fafafa]">Funding Rounds</h2>
@@ -61,31 +57,18 @@ export default function NewsFeed({ raises, activeRounds }) {
         />
       </div>
 
-      {/* Feed */}
       <div className="flex flex-col gap-2">
         {filtered.length === 0 && (
-          <div className="text-center py-16 text-[#52525b] text-sm">
-            No matching rounds found.
-          </div>
+          <div className="text-center py-16 text-[#52525b] text-sm">No matching rounds found.</div>
         )}
         {filtered.map(raise => {
           const websiteUrl = getWebsiteUrl(raise)
-
           return (
-            <div
+            <Link
               key={raise.id}
-              role="button"
-              tabIndex={0}
-              onClick={() => setSelected(raise)}
-              onKeyDown={e => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault()
-                  setSelected(raise)
-                }
-              }}
-              className="w-full text-left group flex items-start gap-4 p-4 rounded-xl border border-[#27272a] bg-[#18181b] hover:border-[#3f3f46] hover:bg-[#1c1c1f] transition-all cursor-pointer"
+              to={`/company/${toSlug(raise.company)}`}
+              className="w-full text-left group flex items-start gap-4 p-4 rounded-xl border border-[#27272a] bg-[#18181b] hover:border-[#3f3f46] hover:bg-[#1c1c1f] transition-all"
             >
-              {/* Company initial */}
               <div
                 className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold flex-shrink-0"
                 style={{ background: '#6366f115', color: '#6366f1', border: '1px solid #6366f125' }}
@@ -105,7 +88,6 @@ export default function NewsFeed({ raises, activeRounds }) {
                   target="_blank"
                   rel="noreferrer"
                   onClick={e => e.stopPropagation()}
-                  onKeyDown={e => e.stopPropagation()}
                   className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-[#818cf8] hover:text-[#a5b4fc]"
                 >
                   <Globe size={13} />
@@ -117,12 +99,9 @@ export default function NewsFeed({ raises, activeRounds }) {
               <div className="flex flex-col items-end gap-1 flex-shrink-0">
                 <span className="text-sm font-bold text-[#fafafa]">{formatAmount(raise.amount)}</span>
                 <span className="text-[10px] text-[#52525b]">{formatDate(raise.date)}</span>
-                <ArrowUpRight
-                  size={14}
-                  className="text-[#3f3f46] group-hover:text-[#6366f1] transition-colors mt-0.5"
-                />
+                <ArrowUpRight size={14} className="text-[#3f3f46] group-hover:text-[#6366f1] transition-colors mt-0.5" />
               </div>
-            </div>
+            </Link>
           )
         })}
       </div>
